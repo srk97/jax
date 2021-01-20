@@ -35,6 +35,10 @@ def bool_env(varname: str, default: bool) -> bool:
   else:
     raise ValueError("invalid truth value %r for environment %r" % (val, varname))
 
+def int_env(varname: str, default: int) -> int:
+  """Read an environment variable and interpret it as an integer."""
+  return int(os.getenv(varname, default))
+
 
 class Config:
   def __init__(self):
@@ -159,4 +163,10 @@ flags.DEFINE_bool(
     'jax_omnistaging',
     bool_env('JAX_OMNISTAGING', True),
     help='Enable staging based on dynamic context rather than data dependence.'
+)
+
+flags.DEFINE_integer(
+    'jax_traceback_num_frames',
+    int_env('JAX_TRACEBACK_NUM_FRAMES', 3),
+    help='Set the number of stack frames in JAX tracer error messages.'
 )

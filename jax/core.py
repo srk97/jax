@@ -434,7 +434,8 @@ class Trace:
            "to handle custom_vjp primitives")
     raise NotImplementedError(msg)
 
-def escaped_tracer_error(tracer, detail=None, num_frames=10):
+def escaped_tracer_error(tracer, detail=None):
+  num_frames = FLAGS.jax_traceback_num_frames
   msg = ("Encountered an unexpected tracer. Perhaps this tracer escaped "
          "through global state from a previously traced function.\n"
          "The functions being transformed should not save traced values to "
@@ -447,10 +448,17 @@ def escaped_tracer_error(tracer, detail=None, num_frames=10):
     pass
   else:
     msg += ('\nThe tracer that caused this error was created on line '
-            f'{source_info_util.summarize(line_info)}.\n'
-            f'When the tracer was created, the final {num_frames} stack frames '
-            '(most recent last) were:\n'
-            f'{source_info_util.summarize(line_info, num_frames=num_frames)}')
+            f'{source_info_util.summarize(line_info)}.\n')
+    if num_frames > 0:
+      msg += (f'When the tracer was created, the final {num_frames} stack '
+              'frames (most recent last) were:\n'
+              f'{source_info_util.summarize(line_info, num_frames=num_frames)}')
+  try:
+    fun_source_info = tracer._trace.main.source_info
+  except AttributeError:
+    pass
+  else:
+    msg += f'\nThe function being traced was {fun_source_info}.'
   return UnexpectedTracerError(msg)
 
 class UnexpectedTracerError(Exception): pass
