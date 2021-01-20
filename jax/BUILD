@@ -14,13 +14,13 @@
 
 # JAX is Autograd and XLA
 
-pytype_library = py_library
+load("//jax:jax.bzl", "pytype_library")
 
 licenses(["notice"])
 
 package(default_visibility = ["//visibility:public"])
 
-# top-level EF placeholder
+exports_files(["LICENSE"])
 
 pytype_library(
     name = "jax",
