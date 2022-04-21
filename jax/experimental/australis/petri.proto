@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package aux.proto;
+
+message PTreeDictProto {
+  map<string, PTreeProto> value = 1;
+}
+
+message PTreeSequenceProto {
+  repeated PTreeProto value = 1;
+}
+
+message PTreeLeafProto {}
+
+message PTreeProto {
+  oneof value {
+    PTreeDictProto dict_value = 1;
+    PTreeSequenceProto tuple_value = 3;
+    PTreeLeafProto leaf_value = 4;
+  }
+}

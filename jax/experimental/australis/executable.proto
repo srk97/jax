@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package aux.proto;
+
+import "jax/experimental/australis/petri.proto";
+
+message ExecutableSpec {
+  PTreeProto out_tree = 1;
+  int64 num_replicas = 2;
+  int64 num_partitions = 3;
+  bool use_spmd_partitioning = 4;
+  bool tuple_args = 5;
+}
