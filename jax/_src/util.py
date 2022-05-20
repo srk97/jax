@@ -545,3 +545,8 @@ class OrderedSet(Generic[T]):
 
   def __contains__(self, elt: T) -> bool:
     return elt in self.elts_set
+
+
+# Built in Python lists don't support weak refs but subclasses of lists do.
+class WeakRefList(list):
+  pass

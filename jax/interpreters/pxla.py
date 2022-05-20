@@ -70,14 +70,10 @@ from jax._src.lib import xla_client as xc
 from jax._src.lib import pmap_lib
 from jax._src.lib.mlir import ir
 from jax._src.lib.mlir.dialects import mhlo
-from jax._src.util import (unzip3, prod, safe_map, safe_zip,
-                           new_name_stack, wrap_name, assert_unreachable,
-                           tuple_insert, tuple_delete, distributed_debug_log)
+from jax._src.util import (unzip3, prod, safe_map, safe_zip, new_name_stack,
+                           wrap_name, assert_unreachable, tuple_insert,
+                           tuple_delete, distributed_debug_log, WeakRefList)
 
-
-# Built in Python lists don't support weak refs but subclasses of lists do.
-class WeakRefList(list):
-  pass
 
 if sys.version_info >= (3, 8):
   from functools import cached_property as maybe_cached_property

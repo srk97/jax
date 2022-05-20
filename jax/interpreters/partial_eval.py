@@ -37,7 +37,7 @@ from jax._src.tree_util import (PyTreeDef, treedef_tuple, tree_unflatten,
                                 tree_leaves)
 from jax._src.util import (unzip2, safe_zip, safe_map, toposort, split_list,
                            merge_lists, partition_list, OrderedSet,
-                           as_hashable_function, weakref_lru_cache)
+                           as_hashable_function, weakref_lru_cache, WeakRefList)
 from jax.core import (Trace, Tracer, Jaxpr, Literal, get_aval, AbstractValue,
                       ClosedJaxpr, new_jaxpr_eqn, ConcreteArray,
                       raise_to_shaped, Var, DropVar, Atom, JaxprEqn, Primitive,
@@ -1836,7 +1836,15 @@ def trace_to_subjaxpr_dynamic(fun: lu.WrappedFun, main: core.MainTrace,
                               in_avals: Sequence[AbstractValue], *,
                               keep_inputs: Optional[Sequence[bool]] = None):
   keep_inputs = [True] * len(in_avals) if keep_inputs is None else keep_inputs
+  jaxpr, out_avals, consts = _trace_to_subjaxpr_dynamic_cached(
+      fun, main, tuple(in_avals), tuple(keep_inputs))
+  return jaxpr, out_avals, consts
 
+
+@lu.cache
+def _trace_to_subjaxpr_dynamic_cached(fun: lu.WrappedFun, main: core.MainTrace,
+                                      in_avals: Sequence[AbstractValue],
+                                      keep_inputs: Sequence[bool]):
   frame = JaxprStackFrame()
   with extend_jaxpr_stack(main, frame), source_info_util.reset_name_stack():
     trace = DynamicJaxprTrace(main, core.cur_sublevel())
@@ -1849,7 +1857,7 @@ def trace_to_subjaxpr_dynamic(fun: lu.WrappedFun, main: core.MainTrace,
   if not config.jax_dynamic_shapes:
     # TODO(frostig,mattjj): update check_jaxpr to handle dynamic shapes
     config.jax_enable_checks and core.check_jaxpr(jaxpr)
-  return jaxpr, [v.aval for v in jaxpr.outvars], consts
+  return WeakRefList((jaxpr, [v.aval for v in jaxpr.outvars], consts))
 
 @contextlib.contextmanager
 def extend_jaxpr_stack(main, frame):
